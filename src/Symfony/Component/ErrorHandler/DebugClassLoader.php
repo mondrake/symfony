@@ -572,10 +572,9 @@ class DebugClassLoader
             }
 
             $returnType = self::$returnTypes[$class][$method->name] ?? null;
-            if (null !== $returnType && isset(self::$returnTypesWillChange[$returnType[2]][$method->name]) && !$method->hasReturnType() && !isset($doc['deprecated'])) {
+            if (null !== $returnType && isset(self::$returnTypesWillChange[$returnType[2]][$method->name]) && !$method->hasReturnType() && !isset($doc['deprecated']) && !$method->getAttributes(\ReturnTypeWillChange::class)) {
                 [$normalizedType, $returnType, $declaringClass, $declaringFile] = $returnType;
-                $when = \is_bool(self::$returnTypesWillChange[$declaringClass][$method->name]) ? 'in the future' : self::$returnTypesWillChange[$declaringClass][$method->name];
-                $deprecations[] = \sprintf('Method "%s::%s()" will add "%s" as a native return type declaration %s. Do the same in %s "%s" now to avoid errors.', $declaringClass, $method->name, $normalizedType, $when, interface_exists($declaringClass) ? 'implementation' : 'child class', $className);
+                $deprecations[] = \sprintf('Method "%s::%s()" will add "%s" as a native return type declaration in the future. Do the same in %s "%s" now to avoid errors.', $declaringClass, $method->name, $normalizedType, interface_exists($declaringClass) ? 'implementation' : 'child class', $className);
             }
 
             if (null !== ($returnType ??= self::$returnTypes[$class][$method->name] ?? null) && 'docblock' === $this->patchTypes['force'] && !$method->hasReturnType() && isset(TentativeTypes::RETURN_TYPES[$returnType[2]][$method->name])) {
@@ -615,8 +614,8 @@ class DebugClassLoader
                 }
             }
 
-            if (isset($doc['return-type-will-change'])) {
-                self::$returnTypesWillChange[$class][$method->name] = $doc['return-type-will-change'][0] ?: true;
+            if ($method->getAttributes(\ReturnTypeWillChange::class)) {
+                self::$returnTypesWillChange[$class][$method->name] = true;
             }
 
             $this->patchTypes['force'] = $forcePatchTypes;

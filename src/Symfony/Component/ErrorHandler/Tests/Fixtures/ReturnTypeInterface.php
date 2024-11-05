@@ -10,14 +10,8 @@ interface ReturnTypeInterface
     public function returnTypeInterface();
 
     /**
-     * @return-type-will-change
      * @return string
      */
+    #[\ReturnTypeWillChange]
     public function returnTypeInterfaceWithWillChange();
-
-    /**
-     * @return-type-will-change in version 42.0.0
-     * @return string
-     */
-    public function returnTypeInterfaceWithWillChangeAndVersion();
 }
